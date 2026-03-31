@@ -512,6 +512,7 @@ button {
 
 .summary-panel {
   position: relative;
+  scroll-margin-top: 20px;
 }
 
 .summary-card {
@@ -698,6 +699,85 @@ button {
   font-size: 0.95rem;
 }
 
+.mobile-macro-bar {
+  display: none;
+}
+
+.mobile-macro-bar__surface {
+  display: grid;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: 24px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(255, 247, 238, 0.96)),
+    var(--wash);
+  box-shadow: 0 20px 36px rgba(31, 20, 13, 0.18);
+  backdrop-filter: blur(16px);
+}
+
+.mobile-macro-bar__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.mobile-macro-bar__label {
+  display: block;
+  margin: 0 0 4px;
+  color: var(--brand);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.mobile-macro-bar__title {
+  display: block;
+  font-family: "Space Grotesk", "Segoe UI", sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.mobile-macro-bar__button {
+  flex-shrink: 0;
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: 0;
+  background: var(--ink);
+  color: white;
+  font-weight: 700;
+}
+
+.mobile-macro-bar__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.mobile-macro-bar__item {
+  display: grid;
+  gap: 4px;
+  padding: 12px 10px;
+  border-radius: 18px;
+  border: 1px solid rgba(41, 28, 18, 0.08);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.mobile-macro-bar__value {
+  font-family: "Space Grotesk", "Segoe UI", sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.mobile-macro-bar__meta {
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.2;
+}
+
 @keyframes rise {
   from {
     opacity: 0;
@@ -739,11 +819,24 @@ button {
   .summary-card {
     padding: 20px;
   }
+
+  .page-shell {
+    padding-bottom: calc(172px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .mobile-macro-bar {
+    position: fixed;
+    left: 14px;
+    right: 14px;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    z-index: 30;
+    display: block;
+  }
 }
 
 @media (max-width: 620px) {
   .page-shell {
-    padding: 18px 14px 32px;
+    padding: 18px 14px calc(186px + env(safe-area-inset-bottom, 0px));
   }
 
   .hero h1 {
@@ -769,5 +862,18 @@ button {
 
   .button-reset {
     width: 100%;
+  }
+
+  .mobile-macro-bar__top {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .mobile-macro-bar__button {
+    width: 100%;
+  }
+
+  .mobile-macro-bar__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

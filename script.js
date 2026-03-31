@@ -38,6 +38,7 @@ const elements = {
   restaurantMeta: document.querySelector("#restaurantMeta"),
   categories: document.querySelector("#categories"),
   summary: document.querySelector("#summary"),
+  mobileMacroBar: document.querySelector("#mobileMacroBar"),
 };
 
 const state = loadState();
@@ -46,6 +47,7 @@ elements.restaurantCards.addEventListener("click", onRestaurantCardClick);
 elements.restaurantMeta.addEventListener("click", onMetaClick);
 elements.categories.addEventListener("click", onCategoryClick);
 elements.summary.addEventListener("click", onSummaryClick);
+elements.mobileMacroBar.addEventListener("click", onMobileMacroBarClick);
 
 render();
 
@@ -162,6 +164,19 @@ function onSummaryClick(event) {
   if (resetButton) {
     resetActiveMeal();
   }
+}
+
+function onMobileMacroBarClick(event) {
+  const actionButton = event.target.closest("[data-action='scroll-summary']");
+
+  if (!actionButton) {
+    return;
+  }
+
+  elements.summary.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
 }
 
 function resetActiveMeal() {
@@ -294,6 +309,7 @@ function render() {
   renderRestaurantMeta(restaurant, selectedItems, totalSelections);
   renderCategories(restaurant);
   renderSummary(restaurant, selectedItems, totals, totalSelections);
+  renderMobileMacroBar(selectedItems, totals, totalSelections);
 }
 
 function renderRestaurantCards(activeRestaurant) {
@@ -507,11 +523,53 @@ function renderSummary(restaurant, selectedItems, totals, totalSelections) {
   `;
 }
 
+function renderMobileMacroBar(selectedItems, totals, totalSelections) {
+  const title = totalSelections
+    ? `${totalSelections} servings counted`
+    : "Start building your meal";
+  const buttonLabel = selectedItems.length ? "View meal" : "View summary";
+
+  elements.mobileMacroBar.innerHTML = `
+    <section class="mobile-macro-bar__surface">
+      <div class="mobile-macro-bar__top">
+        <div>
+          <span class="mobile-macro-bar__label">Live macros</span>
+          <strong class="mobile-macro-bar__title">${title}</strong>
+        </div>
+        <button
+          class="mobile-macro-bar__button"
+          type="button"
+          data-action="scroll-summary"
+          aria-label="Jump to full meal summary"
+        >
+          ${buttonLabel}
+        </button>
+      </div>
+
+      <div class="mobile-macro-bar__grid">
+        ${renderMobileMacroItem("Calories", `${formatNumber(totals.calories)}`)}
+        ${renderMobileMacroItem("Protein", `${formatNumber(totals.protein)}g`)}
+        ${renderMobileMacroItem("Carbs", `${formatNumber(totals.carbs)}g`)}
+        ${renderMobileMacroItem("Fat", `${formatNumber(totals.fat)}g`)}
+      </div>
+    </section>
+  `;
+}
+
 function renderMacroCard(label, value, unit) {
   return `
     <article class="macro-card">
       <span class="macro-card__value">${value}</span>
-      <span class="macro-card__label">${label} · ${unit}</span>
+      <span class="macro-card__label">${label} &middot; ${unit}</span>
+    </article>
+  `;
+}
+
+function renderMobileMacroItem(label, value) {
+  return `
+    <article class="mobile-macro-bar__item">
+      <span class="mobile-macro-bar__value">${value}</span>
+      <span class="mobile-macro-bar__meta">${label}</span>
     </article>
   `;
 }
@@ -523,7 +581,7 @@ function renderSelectedItem(menuItem) {
     <article class="selected-item">
       <div>
         <p class="selected-item__title">${menuItem.quantity}x ${menuItem.name}</p>
-        <p class="selected-item__meta">${menuItem.categoryTitle} · ${menuItem.serving}</p>
+        <p class="selected-item__meta">${menuItem.categoryTitle} &middot; ${menuItem.serving}</p>
       </div>
       <div class="selected-item__side">
         <span class="selected-item__calories">${formatNumber(totalCalories)} cal</span>

@@ -55,6 +55,9 @@ function loadState() {
   const fallback = {
     activeRestaurantId: restaurantIds[0],
     selectionsByRestaurant: Object.fromEntries(restaurantIds.map((id) => [id, {}])),
+    openCategoriesByRestaurant: Object.fromEntries(
+      restaurantIds.map((id) => [id, [restaurants[id].categories[0]?.id].filter(Boolean)]),
+    ),
   };
 
   try {
@@ -75,9 +78,17 @@ function loadState() {
       }),
     );
 
+    const openCategoriesByRestaurant = Object.fromEntries(
+      restaurantIds.map((restaurantId) => {
+        const savedOpen = parsed.openCategoriesByRestaurant?.[restaurantId];
+        return [restaurantId, sanitizeOpenCategories(restaurantId, savedOpen)];
+      }),
+    );
+
     return {
       activeRestaurantId,
       selectionsByRestaurant,
+      openCategoriesByRestaurant,
     };
   } catch (error) {
     return fallback;
@@ -113,6 +124,20 @@ function sanitizeSelection(restaurantId, selection) {
   return cleaned;
 }
 
+function sanitizeOpenCategories(restaurantId, categories) {
+  const validCategoryIds = new Set(restaurants[restaurantId].categories.map((category) => category.id));
+
+  if (!Array.isArray(categories)) {
+    return [restaurants[restaurantId].categories[0]?.id].filter(Boolean);
+  }
+
+  const cleaned = categories.filter((categoryId) => validCategoryIds.has(categoryId));
+
+  return cleaned.length
+    ? cleaned
+    : [restaurants[restaurantId].categories[0]?.id].filter(Boolean);
+}
+
 function persistState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
@@ -140,6 +165,13 @@ function onMetaClick(event) {
 }
 
 function onCategoryClick(event) {
+  const toggleButton = event.target.closest("[data-action='toggle-category'][data-category-id]");
+
+  if (toggleButton) {
+    toggleCategory(toggleButton.dataset.categoryId);
+    return;
+  }
+
   const actionButton = event.target.closest("[data-action][data-item-id]");
 
   if (!actionButton) {
@@ -185,6 +217,20 @@ function resetActiveMeal() {
   render();
 }
 
+function toggleCategory(categoryId) {
+  const openCategories = new Set(state.openCategoriesByRestaurant[state.activeRestaurantId] || []);
+
+  if (openCategories.has(categoryId)) {
+    openCategories.delete(categoryId);
+  } else {
+    openCategories.add(categoryId);
+  }
+
+  state.openCategoriesByRestaurant[state.activeRestaurantId] = [...openCategories];
+  persistState();
+  render();
+}
+
 function updateQuantity(itemId, delta) {
   const restaurant = getActiveRestaurant();
   const menuItem = restaurant.items.find((entry) => entry.id === itemId);
@@ -216,6 +262,10 @@ function getActiveRestaurant() {
 
 function getActiveSelection() {
   return state.selectionsByRestaurant[state.activeRestaurantId];
+}
+
+function getOpenCategories() {
+  return new Set(state.openCategoriesByRestaurant[state.activeRestaurantId] || []);
 }
 
 function getSelectedItems(restaurant = getActiveRestaurant()) {
@@ -379,6 +429,7 @@ function renderRestaurantMeta(restaurant, selectedItems, totalSelections) {
 
 function renderCategories(restaurant) {
   const selection = getActiveSelection();
+  const openCategories = getOpenCategories();
 
   elements.categories.innerHTML = restaurant.categories
     .map((category) => {
@@ -386,22 +437,34 @@ function renderCategories(restaurant) {
         (sum, menuItem) => sum + (selection[menuItem.id] || 0),
         0,
       );
+      const isOpen = openCategories.has(category.id);
 
       return `
-        <section class="category-panel">
-          <div class="category-header">
-            <div>
+        <section class="category-panel ${isOpen ? "is-open" : "is-collapsed"}">
+          <button
+            class="category-header"
+            type="button"
+            data-action="toggle-category"
+            data-category-id="${category.id}"
+            aria-expanded="${isOpen ? "true" : "false"}"
+          >
+            <div class="category-header__copy">
               <p class="eyebrow">${category.title}</p>
               <h3>${category.title}</h3>
               <p>${category.description}</p>
             </div>
-            <span class="count-pill">${categorySelectionCount} selected</span>
-          </div>
+            <div class="category-header__side">
+              <span class="count-pill">${categorySelectionCount} selected</span>
+              <span class="category-chevron" aria-hidden="true">${isOpen ? "−" : "+"}</span>
+            </div>
+          </button>
 
-          <div class="ingredient-grid">
-            ${category.items
-              .map((menuItem) => renderIngredientCard(menuItem, selection[menuItem.id] || 0))
-              .join("")}
+          <div class="category-body" ${isOpen ? "" : "hidden"}>
+            <div class="ingredient-grid">
+              ${category.items
+                .map((menuItem) => renderIngredientCard(menuItem, selection[menuItem.id] || 0))
+                .join("")}
+            </div>
           </div>
         </section>
       `;

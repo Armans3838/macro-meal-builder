@@ -516,8 +516,13 @@ button {
   display: flex;
   align-items: start;
   justify-content: space-between;
+  width: 100%;
   gap: 18px;
   margin-bottom: 18px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
 }
 
 .category-header h3 {
@@ -528,6 +533,45 @@ button {
 .category-header p {
   margin: 10px 0 0;
   line-height: 1.65;
+}
+
+.category-header__copy {
+  min-width: 0;
+}
+
+.category-header__side {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.category-chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid rgba(17, 21, 24, 0.08);
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--ink);
+  font-family: "Sora", "Segoe UI", sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.category-body[hidden] {
+  display: none;
+}
+
+.category-panel.is-collapsed {
+  padding-bottom: 20px;
+}
+
+.category-panel.is-collapsed .category-header {
+  margin-bottom: 0;
 }
 
 .ingredient-grid {

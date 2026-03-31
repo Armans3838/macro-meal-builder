@@ -525,9 +525,9 @@ function renderSummary(restaurant, selectedItems, totals, totalSelections) {
 
 function renderMobileMacroBar(selectedItems, totals, totalSelections) {
   const title = totalSelections
-    ? `${totalSelections} servings counted`
-    : "Start building your meal";
-  const buttonLabel = selectedItems.length ? "View meal" : "View summary";
+    ? `${totalSelections} servings`
+    : "Ready to build";
+  const buttonLabel = selectedItems.length ? "Summary" : "Details";
 
   elements.mobileMacroBar.innerHTML = `
     <section class="mobile-macro-bar__surface">
@@ -546,11 +546,11 @@ function renderMobileMacroBar(selectedItems, totals, totalSelections) {
         </button>
       </div>
 
-      <div class="mobile-macro-bar__grid">
-        ${renderMobileMacroItem("Calories", `${formatNumber(totals.calories)}`)}
-        ${renderMobileMacroItem("Protein", `${formatNumber(totals.protein)}g`)}
-        ${renderMobileMacroItem("Carbs", `${formatNumber(totals.carbs)}g`)}
-        ${renderMobileMacroItem("Fat", `${formatNumber(totals.fat)}g`)}
+      <div class="mobile-macro-bar__stats">
+        ${renderMobileMacroItem("Cal", `${formatNumber(totals.calories)}`)}
+        ${renderMobileMacroItem("P", `${formatNumber(totals.protein)}g`)}
+        ${renderMobileMacroItem("C", `${formatNumber(totals.carbs)}g`)}
+        ${renderMobileMacroItem("F", `${formatNumber(totals.fat)}g`)}
       </div>
     </section>
   `;
@@ -567,9 +567,9 @@ function renderMacroCard(label, value, unit) {
 
 function renderMobileMacroItem(label, value) {
   return `
-    <article class="mobile-macro-bar__item">
-      <span class="mobile-macro-bar__value">${value}</span>
-      <span class="mobile-macro-bar__meta">${label}</span>
+    <article class="mobile-macro-pill">
+      <span class="mobile-macro-pill__value">${value}</span>
+      <span class="mobile-macro-pill__label">${label}</span>
     </article>
   `;
 }

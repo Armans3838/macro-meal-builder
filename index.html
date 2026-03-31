@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Macro Meal Builder</title>
+    <meta
+      name="description"
+      content="Build custom Chipotle, CAVA, and Sweetgreen meals and see calories, protein, carbs, and fat update live."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div class="hero__copy">
+          <p class="eyebrow">Macro Tracker</p>
+          <h1>Build the fast-casual meal you actually order.</h1>
+          <p class="hero__lede">
+            Pick Chipotle, CAVA, or Sweetgreen, stack ingredients one by one,
+            and see the big 4 update live: calories, protein, carbs, and fat.
+          </p>
+        </div>
+        <div class="hero__stats">
+          <article class="hero-stat">
+            <span class="hero-stat__value">3</span>
+            <span class="hero-stat__label">Restaurants</span>
+          </article>
+          <article class="hero-stat">
+            <span class="hero-stat__value">Live</span>
+            <span class="hero-stat__label">Macro totals</span>
+          </article>
+          <article class="hero-stat">
+            <span class="hero-stat__value">Official</span>
+            <span class="hero-stat__label">Nutrition guides</span>
+          </article>
+        </div>
+      </header>
+
+      <section class="selector-panel" aria-labelledby="restaurant-picker-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Step 1</p>
+            <h2 id="restaurant-picker-title">Choose your restaurant</h2>
+          </div>
+          <p class="section-heading__text">
+            Each builder uses ingredient-level nutrition data from the
+            restaurant&apos;s official nutrition guide.
+          </p>
+        </div>
+        <div id="restaurantCards" class="restaurant-grid" aria-live="polite"></div>
+      </section>
+
+      <main class="workspace">
+        <section class="builder-panel">
+          <div id="restaurantMeta" class="restaurant-meta" aria-live="polite"></div>
+          <div id="categories" class="categories" aria-live="polite"></div>
+        </section>
+
+        <aside id="summary" class="summary-panel" aria-live="polite"></aside>
+      </main>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>

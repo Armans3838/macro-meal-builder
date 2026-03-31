@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:www.chipotle.com)",
+      "WebFetch(domain:cavanutrition.com)",
+      "WebFetch(domain:fastfoodnutrition.org)",
+      "WebFetch(domain:chipotlenutrition.org)",
+      "WebFetch(domain:sweetgreenmenus.com)",
+      "WebFetch(domain:cheatdaydesign.com)",
+      "WebFetch(domain:thesgmenu.com)",
+      "WebFetch(domain:chipotle-calculator.com)",
+      "WebFetch(domain:sweetgreenmenuus.com)",
+      "WebFetch(domain:assets.ctfassets.net)",
+      "WebFetch(domain:healthyfastfood.org)"
+    ]
+  }
+}

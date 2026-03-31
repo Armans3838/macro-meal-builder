@@ -32,6 +32,10 @@ const restaurants = Object.fromEntries(
 );
 
 const restaurantIds = Object.keys(restaurants);
+const interactionState = {
+  skipClickUntil: 0,
+  skipClickTarget: null,
+};
 
 const elements = {
   restaurantCards: document.querySelector("#restaurantCards"),
@@ -46,7 +50,9 @@ const state = loadState();
 elements.restaurantCards.addEventListener("click", onRestaurantCardClick);
 elements.restaurantMeta.addEventListener("click", onMetaClick);
 elements.categories.addEventListener("click", onCategoryClick);
+elements.categories.addEventListener("pointerup", onCategoryPointerUp);
 elements.summary.addEventListener("click", onSummaryClick);
+elements.summary.addEventListener("pointerup", onSummaryPointerUp);
 elements.mobileMacroBar.addEventListener("click", onMobileMacroBarClick);
 
 render();
@@ -143,7 +149,7 @@ function persistState() {
 }
 
 function onRestaurantCardClick(event) {
-  const button = event.target.closest("[data-restaurant-id]");
+  const button = getClosestTarget(event.target, "[data-restaurant-id]");
 
   if (!button) {
     return;
@@ -155,7 +161,7 @@ function onRestaurantCardClick(event) {
 }
 
 function onMetaClick(event) {
-  const resetButton = event.target.closest("[data-action='reset-meal']");
+  const resetButton = getClosestTarget(event.target, "[data-action='reset-meal']");
 
   if (!resetButton) {
     return;
@@ -165,41 +171,86 @@ function onMetaClick(event) {
 }
 
 function onCategoryClick(event) {
-  const toggleButton = event.target.closest("[data-action='toggle-category'][data-category-id]");
-
-  if (toggleButton) {
-    toggleCategory(toggleButton.dataset.categoryId);
+  if (shouldSkipSyntheticClick(event)) {
     return;
   }
 
-  const actionButton = event.target.closest("[data-action][data-item-id]");
+  handleCategoryAction(event);
+}
+
+function onCategoryPointerUp(event) {
+  if (event.pointerType === "") {
+    return;
+  }
+
+  if (handleCategoryAction(event)) {
+    registerPointerInteraction(event.target);
+    event.preventDefault();
+  }
+}
+
+function handleCategoryAction(event) {
+  const toggleButton = getClosestTarget(
+    event.target,
+    "[data-action='toggle-category'][data-category-id]",
+  );
+
+  if (toggleButton) {
+    toggleCategory(toggleButton.dataset.categoryId);
+    return true;
+  }
+
+  const actionButton = getClosestTarget(event.target, "[data-action][data-item-id]");
 
   if (!actionButton) {
-    return;
+    return false;
   }
 
   const { action, itemId } = actionButton.dataset;
 
   updateQuantity(itemId, action === "increment" ? 1 : -1);
+  return true;
 }
 
 function onSummaryClick(event) {
-  const removeButton = event.target.closest("[data-remove-item]");
-
-  if (removeButton) {
-    updateQuantity(removeButton.dataset.removeItem, -Infinity);
+  if (shouldSkipSyntheticClick(event)) {
     return;
   }
 
-  const resetButton = event.target.closest("[data-action='reset-meal']");
+  handleSummaryAction(event);
+}
 
-  if (resetButton) {
-    resetActiveMeal();
+function onSummaryPointerUp(event) {
+  if (event.pointerType === "") {
+    return;
+  }
+
+  if (handleSummaryAction(event)) {
+    registerPointerInteraction(event.target);
+    event.preventDefault();
   }
 }
 
+function handleSummaryAction(event) {
+  const removeButton = getClosestTarget(event.target, "[data-remove-item]");
+
+  if (removeButton) {
+    updateQuantity(removeButton.dataset.removeItem, -Infinity);
+    return true;
+  }
+
+  const resetButton = getClosestTarget(event.target, "[data-action='reset-meal']");
+
+  if (resetButton) {
+    resetActiveMeal();
+    return true;
+  }
+
+  return false;
+}
+
 function onMobileMacroBarClick(event) {
-  const actionButton = event.target.closest("[data-action='scroll-summary']");
+  const actionButton = getClosestTarget(event.target, "[data-action='scroll-summary']");
 
   if (!actionButton) {
     return;
@@ -215,6 +266,42 @@ function resetActiveMeal() {
   state.selectionsByRestaurant[state.activeRestaurantId] = {};
   persistState();
   render();
+}
+
+function registerPointerInteraction(target) {
+  interactionState.skipClickUntil = Date.now() + 500;
+  interactionState.skipClickTarget = target;
+}
+
+function shouldSkipSyntheticClick(event) {
+  const interactiveTarget = getClosestTarget(
+    event.target,
+    "[data-action], [data-remove-item], [data-restaurant-id]",
+  );
+
+  if (!interactiveTarget) {
+    return false;
+  }
+
+  if (Date.now() > interactionState.skipClickUntil) {
+    return false;
+  }
+
+  const previousTarget = interactionState.skipClickTarget;
+
+  if (!previousTarget) {
+    return false;
+  }
+
+  return (
+    previousTarget === interactiveTarget ||
+    previousTarget.contains(interactiveTarget) ||
+    interactiveTarget.contains(previousTarget)
+  );
+}
+
+function getClosestTarget(target, selector) {
+  return target instanceof Element ? target.closest(selector) : null;
 }
 
 function toggleCategory(categoryId) {
@@ -455,7 +542,7 @@ function renderCategories(restaurant) {
             </div>
             <div class="category-header__side">
               <span class="count-pill">${categorySelectionCount} selected</span>
-              <span class="category-chevron" aria-hidden="true">${isOpen ? "−" : "+"}</span>
+              <span class="category-chevron" aria-hidden="true">${isOpen ? "-" : "+"}</span>
             </div>
           </button>
 
